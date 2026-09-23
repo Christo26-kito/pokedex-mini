@@ -6,22 +6,25 @@ import NotFoundPage from "./pages/NotFoundPage.jsx";
 import ComparePage from "./pages/ComparePage.jsx";
 import FavoritesPage from "./pages/FavoritesPage.jsx";
 import { FavoritesProvider } from "./FavoritesContext.jsx";
+import { ThemeProvider } from "./ThemeContext.jsx";
 
 function App() {
   return (
-    <FavoritesProvider>
-      <HashRouter>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<ListPage />} />
-            <Route path="/pokemon/:name" element={<DetailPage />} />
-            <Route path="/favorites" element={<FavoritesPage />} />
-            <Route path="/compare" element={<ComparePage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Route>
-        </Routes>
-      </HashRouter>
-    </FavoritesProvider>
+    <ThemeProvider>
+      <FavoritesProvider>
+        <HashRouter>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<ListPage />} />
+              <Route path="/pokemon/:name" element={<DetailPage />} />
+              <Route path="/favorites" element={<FavoritesPage />} />
+              <Route path="/compare" element={<ComparePage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Route>
+          </Routes>
+        </HashRouter>
+      </FavoritesProvider>
+    </ThemeProvider>
   );
 }
 

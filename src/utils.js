@@ -74,3 +74,25 @@ export function fetchPokemonIndex() {
 export function randomFromIndex(index) {
   return index[Math.floor(Math.random() * index.length)];
 }
+
+// Per-type full list (cached per type).
+// IMPORTANT: PokeAPI ignores `?type=` on GET /pokemon — the only way to list
+// every Pokémon of a type is GET /type/{name}, which returns { pokemon: [{
+// slot, pokemon: {name, url} }] } ordered by Pokédex number.
+const typeListCache = {};
+
+export function fetchTypePokemon(type) {
+  if (!typeListCache[type]) {
+    typeListCache[type] = fetch(`${API_BASE_URL}/type/${type}`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`Server responded with status ${r.status}`);
+        return r.json();
+      })
+      .then((data) => data.pokemon.map((entry) => entry.pokemon))
+      .catch((err) => {
+        delete typeListCache[type];
+        throw err;
+      });
+  }
+  return typeListCache[type];
+}

@@ -796,6 +796,215 @@ h1 {
   image-rendering: pixelated;
 }
 
+/* ---------- Header row & theme toggle ---------- */
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.theme-toggle {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  background: var(--color-card);
+  border: var(--clay-border);
+  border-radius: var(--clay-radius-sm);
+  box-shadow: var(--clay-shadow-sm);
+  color: var(--color-foreground);
+  flex-shrink: 0;
+}
+
+.theme-toggle:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Filter blocks ---------- */
+.filter-block {
+  margin-top: 14px;
+}
+
+.filter-label {
+  font-family: "Fredoka", "Nunito", sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-muted-foreground);
+  margin: 0 0 8px;
+}
+
+.list-counter {
+  text-align: center;
+  color: var(--color-muted-foreground);
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin: 16px 0 4px;
+}
+
+.list-counter strong {
+  color: var(--color-primary);
+  font-family: "Fredoka", monospace;
+}
+
+/* ---------- Pokemon grid (replaces the vertical list) ---------- */
+.pokemon-grid {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.grid-card {
+  opacity: 0;
+  animation: card-in 300ms ease-out forwards;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.grid-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-card);
+  border: var(--clay-border);
+  border-radius: var(--clay-radius);
+  padding: 14px 10px 12px;
+  box-shadow: var(--clay-shadow);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+
+.grid-link:hover {
+  transform: translateY(-4px) scale(1.02);
+}
+
+.grid-link:focus-visible {
+  outline: 3px solid var(--color-accent);
+}
+
+.grid-sprite {
+  width: 84px;
+  height: 84px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 40%,
+    rgba(255, 255, 255, 0.65),
+    rgba(255, 255, 255, 0) 72%
+  );
+}
+
+.grid-sprite img {
+  width: 72px;
+  height: 72px;
+  image-rendering: pixelated;
+  transition: transform 200ms ease-out;
+}
+
+.grid-link:hover .grid-sprite img {
+  transform: scale(1.12) rotate(-6deg);
+}
+
+.grid-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.grid-id {
+  font-family: "Fredoka", monospace;
+  color: var(--color-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.grid-name {
+  font-weight: 800;
+  text-transform: capitalize;
+  color: var(--color-card-foreground);
+  font-size: 0.95rem;
+  text-align: center;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+/* Grid skeleton inherits .pokemon-grid + .skeleton-card */
+.pokemon-grid .skeleton-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 10px;
+  opacity: 0;
+  animation: card-in 300ms ease-out forwards;
+}
+
+/* Wider desktop layout */
+@media (min-width: 768px) {
+  .app {
+    max-width: 700px;
+  }
+
+  .pokemon-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ---------- Dark mode (overrides clay tokens) ---------- */
+:root[data-theme="dark"] {
+  --color-background: #140d08;
+  --color-foreground: #fde9d2;
+  --color-card: #2a1c12;
+  --color-card-foreground: #fde9d2;
+  --color-muted: #382517;
+  --color-muted-foreground: #d6b28f;
+  --color-border: #43291a;
+  --clay-border: 2.5px solid rgba(0, 0, 0, 0.4);
+  --clay-shadow:
+    0 6px 0 rgba(0, 0, 0, 0.35),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.25),
+    inset 0 3px 0 rgba(255, 255, 255, 0.05);
+  --clay-shadow-sm:
+    0 3px 0 rgba(0, 0, 0, 0.3),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.2),
+    inset 0 2px 0 rgba(255, 255, 255, 0.04);
+}
+
+:root[data-theme="dark"] .grid-sprite {
+  background: radial-gradient(
+    circle at 50% 40%,
+    rgba(255, 196, 140, 0.16),
+    rgba(255, 196, 140, 0) 72%
+  );
+}
+
+:root[data-theme="dark"] .toast {
+  background: #fde9d2;
+  color: #140d08;
+}
+
+:root[data-theme="dark"] .autocomplete {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   * {

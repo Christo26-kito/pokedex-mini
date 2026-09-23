@@ -6,6 +6,7 @@ import {
   getIdFromUrl,
   randomFromIndex,
 } from "../utils.js";
+import { DiceIcon } from "./Icons.jsx";
 
 const SUGGESTIONS = 6;
 
@@ -103,7 +104,8 @@ export default function SearchForm() {
           disabled={!index}
           aria-label="Pick a random Pokémon"
         >
-          🎲 Surprise me
+          <DiceIcon />
+          <span>Surprise me</span>
         </button>
       </div>
 
