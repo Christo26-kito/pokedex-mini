@@ -2,6 +2,9 @@ export const API_BASE_URL = "https://pokeapi.co/api/v2";
 export const SPRITE_BASE_URL =
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon";
 
+// Total number of Pokémon in the current Pokédex (Gen 1–10).
+export const MAX_ID = 1351;
+
 // Per-type colors (official Pokémon palette) for chips & accents
 export const TYPE_COLORS = {
   normal: "#A8A878",

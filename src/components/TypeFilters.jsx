@@ -3,10 +3,10 @@ import { getTypeColor, typeTextColor } from "../utils.js";
 
 export default function TypeFilters({ value, onChange }) {
   return (
-    <div className="type-filters" role="group" aria-label="Filter by type">
+    <div className="chip-scroll" role="group" aria-label="Filter by type">
       <button
         className={`type-chip ${value ? "" : "active"}`}
-        style={!value ? { background: "#57534e", color: "#fff" } : {}}
+        style={!value ? { background: "var(--color-chip-active)", color: "var(--color-chip-active-text)" } : {}}
         onClick={() => onChange(null)}
         aria-pressed={!value}
       >

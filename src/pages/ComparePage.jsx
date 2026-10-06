@@ -1,17 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  API_BASE_URL,
-} from "../config.js";
+import { API_BASE_URL } from "../config.js";
 import {
   fetchPokemonIndex,
   capitalize,
-  getIdFromUrl,
-  getSpriteUrl,
   STAT_COLORS,
   STAT_NAMES,
+  totalBase,
 } from "../utils.js";
 import TypeBadge from "../components/TypeBadge.jsx";
+import FadeImg from "../components/FadeImg.jsx";
 import { SkeletonDetail } from "../components/Skeletons.jsx";
+import { SwapIcon, DiceIcon } from "../components/Icons.jsx";
 
 const PICKER_LIMIT = 151; // gen 1 picks keep the dropdowns snappy
 
@@ -70,8 +69,22 @@ export default function ComparePage() {
     return map;
   }, [pb.data]);
 
-  function statFor(map, name) {
-    return map[name] ?? 0;
+  function statFor(map, n) {
+    return map[n] ?? 0;
+  }
+
+  function swap() {
+    setA(b);
+    setB(a);
+  }
+
+  function randomPick() {
+    if (!options.length) return;
+    const i = Math.floor(Math.random() * options.length);
+    let j = Math.floor(Math.random() * options.length);
+    if (j === i) j = (j + 1) % options.length;
+    setA(options[i].name);
+    setB(options[j].name);
   }
 
   if (pa.error) return <p className="status status-error">{pa.error}</p>;
@@ -81,8 +94,12 @@ export default function ComparePage() {
 
   if (loading) return <SkeletonDetail />;
 
+  const totalA = totalBase(pa.data.stats);
+  const totalB = totalBase(pb.data.stats);
+  const winner = totalA === totalB ? "tie" : totalA > totalB ? "a" : "b";
+
   return (
-    <div className="compare-page">
+    <div className="compare-page page-enter">
       <div className="compare-card">
         <div className="compare-pick">
           <select
@@ -96,6 +113,14 @@ export default function ComparePage() {
               </option>
             ))}
           </select>
+          <button
+            className="btn compare-swap"
+            onClick={swap}
+            aria-label="Swap the two Pokémon"
+            title="Swap"
+          >
+            <SwapIcon />
+          </button>
           <select
             value={b}
             onChange={(e) => setB(e.target.value)}
@@ -109,12 +134,18 @@ export default function ComparePage() {
           </select>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "space-around" }}>
-          <div className="compare-head" style={{ flexDirection: "column" }}>
-            <img
-              src={
-                pa.data.sprites.other["official-artwork"].front_default
-              }
+        <button className="btn btn-ghost compare-random" onClick={randomPick}>
+          <DiceIcon />
+          <span>Pick random</span>
+        </button>
+
+        <div className="compare-arena">
+          <div
+            className={`compare-head ${winner === "a" ? "winner" : ""}`}
+            style={{ flexDirection: "column" }}
+          >
+            <FadeImg
+              src={pa.data.sprites.other["official-artwork"]?.front_default}
               alt={a}
               width={80}
               height={80}
@@ -122,18 +153,23 @@ export default function ComparePage() {
             <h3>{capitalize(a)}</h3>
             <div className="pokemon-types" style={{ margin: 4 }}>
               {pa.data.types.map((t) => (
-                <TypeBadge key={t.type.name} type={t.type.name} />
+                <TypeBadge key={t.type.name} type={t.type.name} small />
               ))}
             </div>
+            <span className="compare-total">
+              <b>{totalA}</b> total
+            </span>
+            {winner === "a" && <span className="compare-crown">Highest total</span>}
           </div>
 
           <div className="compare-vs">VS</div>
 
-          <div className="compare-head" style={{ flexDirection: "column" }}>
-            <img
-              src={
-                pb.data.sprites.other["official-artwork"].front_default
-              }
+          <div
+            className={`compare-head ${winner === "b" ? "winner" : ""}`}
+            style={{ flexDirection: "column" }}
+          >
+            <FadeImg
+              src={pb.data.sprites.other["official-artwork"]?.front_default}
               alt={b}
               width={80}
               height={80}
@@ -141,32 +177,38 @@ export default function ComparePage() {
             <h3>{capitalize(b)}</h3>
             <div className="pokemon-types" style={{ margin: 4 }}>
               {pb.data.types.map((t) => (
-                <TypeBadge key={t.type.name} type={t.type.name} />
+                <TypeBadge key={t.type.name} type={t.type.name} small />
               ))}
             </div>
+            <span className="compare-total">
+              <b>{totalB}</b> total
+            </span>
+            {winner === "b" && <span className="compare-crown">Highest total</span>}
           </div>
         </div>
 
-        <div style={{ marginTop: 18 }}>
-          {STAT_NAMES.map((statName) => {
+        <div className="compare-stats">
+          {STAT_NAMES.map((statName, i) => {
             const av = statFor(statMap, statName);
             const bv = statFor(statMapB, statName);
             const color = STAT_COLORS[statName];
             return (
-              <div className="compare-bar" key={statName}>
+              <div
+                className="compare-bar"
+                key={statName}
+                style={{ animationDelay: `${i * 40}ms` }}
+              >
                 <div className="compare-fill">
                   <div
                     className="fill left"
                     style={{
                       width: `${Math.min(50, (av / Math.max(av, bv)) * 50)}%`,
-                      background: a === b ? color : color,
+                      background: color,
                       opacity: av >= bv ? 1 : 0.45,
                     }}
                   />
                 </div>
-                <span className="stat-name">
-                  {statName.replace("-", " ")}
-                </span>
+                <span className="stat-name">{statName.replace("-", " ")}</span>
                 <div className="compare-fill">
                   <div
                     className="fill right"
@@ -181,7 +223,12 @@ export default function ComparePage() {
             );
           })}
           <p className="compare-note">
-            Brighter side = higher stat. {a === b ? "Picking the same two…" : "Same stat? Draw!"}
+            Brighter side = higher stat.{" "}
+            {a === b
+              ? "Picking the same two…"
+              : winner === "tie"
+                ? "Dead even — draw!"
+                : "Higher total takes the crown."}
           </p>
         </div>
       </div>

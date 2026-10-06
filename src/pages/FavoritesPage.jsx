@@ -7,6 +7,8 @@ import {
   getIdFromUrl,
   getSpriteUrl,
 } from "../utils.js";
+import FadeImg from "../components/FadeImg.jsx";
+import { XIcon, PokeballIcon } from "../components/Icons.jsx";
 
 export default function FavoritesPage() {
   const { favorites, removeFavorite, caught } = useFavorites();
@@ -30,55 +32,73 @@ export default function FavoritesPage() {
     return id ? getSpriteUrl(id) : null;
   }
 
+  const totalCaught = Object.values(caught).reduce((s, n) => s + n, 0);
+
   return (
-    <div className="favorites-page">
+    <div className="favorites-page page-enter">
       {favorites.length === 0 ? (
         <div className="empty">
-          <p>No favorites yet.</p>
+          <div className="empty-art" aria-hidden="true">
+            <PokeballIcon width={52} height={52} />
+          </div>
+          <p><strong>No favorites yet.</strong></p>
           <p>
-            Open a Pokémon and tap <strong>♡ Favorite</strong> to build your
+            Open a Pokémon and tap <strong>Favorite</strong> to build your
             team.
           </p>
           <Link to="/" className="btn btn-primary">
             Go to Pokédex
           </Link>
+          {totalCaught > 0 && (
+            <p className="empty-aside">
+              You&apos;ve caught <strong>{totalCaught}</strong> Pokémon total —
+              favorites are where your best ones live.
+            </p>
+          )}
         </div>
       ) : (
         <>
-          <h2 style={{ textAlign: "center", marginTop: 8 }}>
-            Your team ({favorites.length})
-          </h2>
+          <div className="fav-header">
+            <h2>Your team</h2>
+            <span className="fav-count">{favorites.length}</span>
+          </div>
+          {totalCaught > 0 && (
+            <p className="fav-subtotal">{totalCaught} caught total</p>
+          )}
           <ul className="fav-list">
-            {favorites.map((name) => {
+            {favorites.map((name, i) => {
               const count = caught[name] || 0;
               const sprite = spriteFor(name);
               return (
-                <li key={name} className="fav-card">
+                <li key={name} className="fav-card" style={{ animationDelay: `${i * 40}ms` }}>
                   {sprite ? (
-                    <img src={sprite} alt={name} width={44} height={44} />
+                    <FadeImg
+                      src={sprite}
+                      alt={name}
+                      width={48}
+                      height={48}
+                      pixelated
+                    />
                   ) : (
                     <div
                       className="skeleton-block"
-                      style={{ width: 44, height: 44 }}
+                      style={{ width: 48, height: 48, borderRadius: 12 }}
                     />
                   )}
-                  <Link className="fav-name" to={`/pokemon/${name}`}>
-                    {capitalize(name)}
+                  <div className="fav-body">
+                    <Link className="fav-name" to={`/pokemon/${name}`}>
+                      {capitalize(name)}
+                    </Link>
                     {count > 0 && (
-                      <span
-                        style={{ color: "var(--color-accent)" }}
-                      >
-                        {" "}
-                        · caught {count}×
-                      </span>
+                      <span className="fav-caught">caught {count}×</span>
                     )}
-                  </Link>
+                  </div>
                   <button
                     className="fav-remove"
                     onClick={() => removeFavorite(name)}
                     aria-label={`Remove ${name} from favorites`}
                   >
-                    ✕
+                    <XIcon />
                   </button>
                 </li>
               );

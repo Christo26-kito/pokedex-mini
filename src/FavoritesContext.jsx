@@ -1,37 +1,12 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { usePersistentState } from "./hooks.js";
 
 const FavoritesContext = createContext(null);
 const TOAST_EVENT = "pokedex-toast";
 
-function useLocalStorage(key, initial) {
-  const [value, setValue] = useState(() => {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : initial;
-    } catch {
-      return initial;
-    }
-  });
-
-  useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(value));
-  }, [key, value]);
-
-  return [value, setValue];
-}
-
 export function FavoritesProvider({ children }) {
-  const [favorites, setFavorites] = useLocalStorage(
-    "pokedex-favorites",
-    []
-  );
-  const [caught, setCaught] = useLocalStorage("pokedex-caught", {});
+  const [favorites, setFavorites] = usePersistentState("pokedex-favorites", []);
+  const [caught, setCaught] = usePersistentState("pokedex-caught", {});
 
   function addFavorite(name) {
     setFavorites((prev) =>
@@ -83,25 +58,37 @@ export function showToast(message) {
 
 function ToastHost() {
   const [message, setMessage] = useState(null);
+  const [visible, setVisible] = useState(false);
   const timer = useRef(null);
+  const showTimer = useRef(null);
 
   useEffect(() => {
     function handle(event) {
       setMessage(event.detail.message);
+      setVisible(true);
       clearTimeout(timer.current);
-      timer.current = setTimeout(() => setMessage(null), 2400);
+      clearTimeout(showTimer.current);
+      timer.current = setTimeout(() => {
+        setVisible(false);
+        showTimer.current = setTimeout(() => setMessage(null), 280);
+      }, 2200);
     }
     window.addEventListener(TOAST_EVENT, handle);
     return () => {
       window.removeEventListener(TOAST_EVENT, handle);
       clearTimeout(timer.current);
+      clearTimeout(showTimer.current);
     };
   }, []);
 
   if (!message) return null;
 
   return (
-    <div className="toast" role="status" aria-live="polite">
+    <div
+      className={`toast ${visible ? "toast-show" : ""}`}
+      role="status"
+      aria-live="polite"
+    >
       {message}
     </div>
   );

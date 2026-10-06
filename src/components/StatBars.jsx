@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { STAT_COLORS, statPercent } from "../utils.js";
 
-function StatBar({ stat }) {
+function StatBar({ stat, delay = 0 }) {
   const [width, setWidth] = useState(0);
 
   useEffect(() => {
-    const frame = requestAnimationFrame(() => setWidth(statPercent(stat.base_stat)));
-    return () => cancelAnimationFrame(frame);
-  }, [stat]);
+    const target = statPercent(stat.base_stat);
+    // stagger the fills slightly; cached data still animates smoothly
+    const t = setTimeout(() => setWidth(target), 80 + delay);
+    return () => clearTimeout(t);
+  }, [stat, delay]);
 
   return (
     <div className="stat-row">
@@ -26,11 +28,11 @@ function StatBar({ stat }) {
   );
 }
 
-export default function StatBars({ stats }) {
+export default function StatBars({ stats, animated = true }) {
   return (
     <ul className="stat-list">
-      {stats.map((s) => (
-        <StatBar key={s.stat.name} stat={s} />
+      {stats.map((s, i) => (
+        <StatBar key={s.stat.name} stat={s} delay={animated ? i * 70 : 0} />
       ))}
     </ul>
   );
